@@ -27,9 +27,11 @@ rand = { version = "0.8", optional = true }
 rand = "0.8"
 float-cmp = "0.9"
 criterion = "0.3"
+rayon = "1.5.3"
 
 [profile.release]
-debug = 1
+lto = true
+codegen-units = 1
 
 [[bench]]
 name = "candidate_container_comparison"
