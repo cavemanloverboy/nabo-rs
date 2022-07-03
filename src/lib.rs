@@ -110,6 +110,7 @@ pub struct Neighbour<T: Scalar, P: Point<T>> {
 }
 
 /// The type of container to keep candidates
+#[derive(Clone, Copy)]
 pub enum CandidateContainer {
     /// use a linear vector to keep candidates, good for small k
     Linear,
