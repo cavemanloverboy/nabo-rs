@@ -129,6 +129,17 @@ pub struct Parameters<T: Scalar> {
     pub sort_results: bool,
 }
 
+impl<T: Scalar> Default for Parameters<T> {
+    fn default() -> Parameters<T> {
+        Parameters { 
+            epsilon: T::zero(), 
+            max_radius: T::infinity(),
+            allow_self_match: true,
+            sort_results: true,
+        }
+    }
+}
+
 /// A dense vector of search nodes, provides better memory performances than many small objects
 type Nodes<T, P> = Vec<Node<T, P>>;
 
@@ -206,12 +217,7 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
         self.knn_advanced(
             k, query,
             candidate_container,
-            &Parameters {
-                epsilon: T::from(0.0).unwrap(),
-                max_radius: T::infinity(),
-                allow_self_match: true,
-                sort_results: true,
-            },
+            &Parameters::default(),
             None,
         )
     }
