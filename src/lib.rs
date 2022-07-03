@@ -68,7 +68,7 @@ pub trait Scalar: Float + AddAssign + std::fmt::Debug {}
 impl<T: Float + AddAssign + std::fmt::Debug> Scalar for T {}
 
 /// A point in the space to be searched
-pub trait Point<T: Scalar>: Default {
+pub trait Point<T: Scalar>: Default + Clone + Debug {
     /// Sets the value for the `i`-th component, `i` must be within `0..DIM`.
     fn set(&mut self, i: u32, value: NotNan<T>);
     /// Gets the value for the `i`-th component, `i` must be within `0..DIM`.
