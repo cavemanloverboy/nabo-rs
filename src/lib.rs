@@ -55,11 +55,12 @@ mod node;
 
 use internal_parameters::InternalParameters;
 use node::Node;
-use num_traits::{clamp_max, clamp_min, Bounded, Zero};
+use num_traits::{clamp_max, clamp_min, Bounded, Zero, Signed};
 use ordered_float::Float;
 pub use ordered_float::NotNan;
 use std::{collections::BinaryHeap, ops::AddAssign};
-
+use std::cmp::{Ordering, Ord};
+use std::fmt::Debug;
 use heap::CandidateHeap;
 use internal_neighbour::InternalNeighbour;
 
