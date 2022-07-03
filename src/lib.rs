@@ -247,6 +247,119 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
         )
     }
 
+
+    /// Finds the `k` nearest neighbour of `query` with periodic boundary conditions, using reasonable
+    /// default parameters.
+    ///
+    /// If there are less than `k` points in the point cloud, the returned vector will be smaller than `k`.
+    /// The default parameters are:
+    /// Exact search, no max. radius, allowing self matching, sorting results, and not collecting statistics.
+    /// If `k` <= 16, a linear vector is used to keep track of candidates, otherwise a binary heap is used.
+    pub fn knn_periodic(&self, k: u32, query: &P, periodic: &[NotNan<T>; K]) -> Vec<Neighbour<T, P>> {
+        let candidate_container = if k <= 16 {
+            CandidateContainer::Linear
+        } else {
+            CandidateContainer::BinaryHeap
+        };
+
+        // First get real images
+        let mut real_image_knns: Vec<Neighbour<T, P>> = self.knn_advanced(
+            k, query,
+            candidate_container,
+            &Parameters::default(),
+            None,
+        );
+
+        // Find max dist2
+        let max_dist2 = real_image_knns.iter().max().unwrap().dist2.into_inner();
+
+        // Find closest dist2 to every side
+        let mut closest_side_dist2: [T; K] = [T::zero(); K];
+        for side in 0..K {
+
+            // Do a single index here. This is equal to distance to lower side
+            let query_component: NotNan<T> = query.get(side as u32);
+
+            // Get distance to upper half
+            let upper = periodic[side] - query_component;
+
+            // !negative includes zero
+            debug_assert!(!upper.is_negative()); 
+            debug_assert!(!query_component.is_negative());
+
+            // Choose lesser of two and then square
+            closest_side_dist2[side] = upper.min(query_component).powi(2);
+        }
+
+        // Find which images we need to check.
+        // Initialize vector with real image (which we will remove later)
+        let mut images_to_check = Vec::with_capacity(2_usize.pow(K as u32)-1);
+        for image in 1..2_usize.pow(K as u32) {
+            
+            // Closest image in the form of bool array
+            let closest_image = (0..K)
+                .map(|idx| ((image / 2_usize.pow(idx as u32)) % 2) == 1);
+
+            // Find distance to corresponding side, edge, vertex or other higher dimensional equivalent
+            let dist_to_side_edge_or_other: T = closest_image
+                .clone()
+                .enumerate()
+                .flat_map(|(side, flag)| if flag {
+                    
+                    // Get minimum of dist2 to lower and upper side
+                    Some(closest_side_dist2[side])
+                } else { None })
+                .fold(T::zero(), |acc, x| acc + x);
+
+            if dist_to_side_edge_or_other < max_dist2 {
+
+                let mut image_to_check = query.clone();
+                
+                for (idx, flag) in closest_image.enumerate() {
+
+                    // If moving image along this dimension
+                    if flag {
+                        // Do a single index here. This is equal to distance to lower side
+                        let query_component: NotNan<T> = query.get(idx as u32);
+                        // Single index here as well
+                        let periodic_component = periodic[idx];
+
+                        if query_component < periodic_component / T::from(2_u8).unwrap() {
+                            // Add if in lower half of box
+                            image_to_check.set(idx as u32, query_component + periodic_component)
+                        } else {
+                            // Subtract if in upper half of box
+                            image_to_check.set(idx as u32, query_component - periodic_component)
+                        }
+                        
+                    }
+                }
+
+                images_to_check.push(image_to_check);
+            }
+        }
+        // println!("\nhere's one {query:?}, {images_to_check:?}\n");
+
+        // Then check all images
+        for image in &images_to_check {
+
+            // Append it to real images, we will clean up later.
+            real_image_knns.append(&mut self.knn_advanced(
+                k, image,
+                candidate_container,
+                &Parameters::default(),
+                None,
+            ))
+        }
+
+        // Perform cleanup
+        real_image_knns.sort();
+        real_image_knns.dedup();
+        real_image_knns.truncate(k as usize);
+
+        real_image_knns
+    }
+
     /// Finds the `k` nearest neighbour of `query`, with user-provided parameters.
     ///
     /// If there are less than `k` points in the point cloud or in the ball around `query`
