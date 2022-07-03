@@ -12,7 +12,7 @@ use num_traits::Bounded;
 use crate::Point;
 
 /// A simple `f32` 2-D point type for testing
-#[derive(Clone, Copy, PartialEq, Debug, Default)]
+#[derive(Clone, Copy, Eq, PartialEq, Debug, Default)]
 pub struct P2(pub [NotNan<f32>; 2]);
 impl P2 {
     /// Creates a new point from (x,y).
