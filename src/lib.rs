@@ -257,7 +257,7 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
             allow_self_match,
             sort_results,
         } = *parameters;
-        let max_error = epsilon + T::from(1).unwrap();
+        let max_error = epsilon + T::one();
         let max_error2 = NotNan::new(max_error * max_error).unwrap();
         let max_radius2 = NotNan::new(max_radius * max_radius).unwrap();
         #[cfg_attr(rustfmt, rustfmt_skip)]
