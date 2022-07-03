@@ -334,7 +334,7 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
                         internal_parameters,
                     );
                     rd += new_off * new_off - old_off * old_off;
-                    if rd <= max_radius2 && rd * max_error2 < heap.furthest_dist2() {
+                    if rd <= max_radius2 && rd * max_error2 <= heap.furthest_dist2() {
                         off[split_dim] = new_off;
                         #[cfg_attr(rustfmt, rustfmt_skip)]
                         let new_visits= self.recurse_knn(
@@ -356,7 +356,7 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
                         internal_parameters,
                     );
                     rd += new_off * new_off - old_off * old_off;
-                    if rd <= max_radius2 && rd * max_error2 < heap.furthest_dist2() {
+                    if rd <= max_radius2 && rd * max_error2 <= heap.furthest_dist2() {
                         off[split_dim] = new_off;
                         #[cfg_attr(rustfmt, rustfmt_skip)]
                         let new_visits = self.recurse_knn(
@@ -384,7 +384,7 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
                         allow_self_match,
                         ..
                     } = *internal_parameters;
-                    if dist2 < max_radius2 && (allow_self_match || (dist2 > epsilon)) {
+                    if dist2 <= max_radius2 && (allow_self_match || (dist2 > epsilon)) {
                         heap.add(dist2, bucket_index);
                     }
                 }
