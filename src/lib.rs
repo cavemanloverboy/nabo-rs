@@ -109,6 +109,29 @@ pub struct Neighbour<T: Scalar, P: Point<T>> {
     pub index: Index,
 }
 
+impl<T: Scalar, P: Point<T>> PartialOrd for Neighbour<T,P> {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.dist2.partial_cmp(&other.dist2)
+    }
+}
+
+impl<T: Scalar, P: Point<T>> Ord for Neighbour<T, P>
+where
+    NotNan<T>: Eq + Ord,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.dist2.cmp(&other.dist2)
+    }
+}
+
+impl<T: Scalar, P: Point<T>> PartialEq for Neighbour<T,P> {
+    fn eq(&self, other: &Self) -> bool {
+        self.dist2 == other.dist2
+    }
+}
+
+impl<T: Scalar, P: Point<T>> Eq for Neighbour<T,P> { }
+
 /// The type of container to keep candidates
 #[derive(Clone, Copy)]
 pub enum CandidateContainer {
