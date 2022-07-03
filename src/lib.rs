@@ -9,8 +9,9 @@
 //! ```
 //! use nabo::dummy_point::*;
 //! use nabo::KDTree;
+//! const K: usize = 2;
 //! let cloud = random_point_cloud(10000);
-//! let tree = KDTree::new(&cloud);
+//! let tree = KDTree::<_,_,K>::new(&cloud);
 //! let query = random_point();
 //! let neighbour = tree.knn(3, &query);
 //! ```
@@ -21,8 +22,9 @@
 //! use nabo::KDTree;
 //! use nabo::CandidateContainer;
 //! use nabo::Parameters;
+//! const K: usize = 2;
 //! let cloud = random_point_cloud(10000);
-//! let tree = KDTree::new(&cloud);
+//! let tree = KDTree::<_,_,K>::new(&cloud);
 //! let query = random_point();
 //! let mut touch_count = 0;
 //! let neighbour = tree.knn_advanced(
@@ -136,7 +138,7 @@ type Nodes<T, P> = Vec<Node<T, P>>;
 /// Contrary to the latter, it does not keep a reference to the point cloud but copies the point.
 /// It retains their index though.
 #[derive(Debug)]
-pub struct KDTree<T: Scalar, P: Point<T>> {
+pub struct KDTree<T: Scalar, P: Point<T>, const K: usize> {
     /// size of a bucket
     bucket_size: u32,
     /// search nodes
@@ -147,7 +149,7 @@ pub struct KDTree<T: Scalar, P: Point<T>> {
     indices: Vec<Index>,
 }
 
-impl<T: Scalar, P: Point<T>> KDTree<T, P> {
+impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
     /// Creates a new KD-Tree from a point cloud.
     pub fn new(cloud: &[P]) -> Self {
         KDTree::new_with_bucket_size(cloud, 8)
@@ -277,8 +279,8 @@ impl<T: Scalar, P: Point<T>> KDTree<T, P> {
         sort_results: bool,
         touch_statistics: Option<&mut u32>,
     ) -> Vec<InternalNeighbour<T>> {
-        // TODO Const generics: once available, remove `vec!` below.
-        let mut off = vec![NotNan::<T>::zero(); P::DIM as usize];
+        // TODO Const generics: once available, remove `vec!` below. update: done but leaving note
+        let mut off = [NotNan::<T>::zero(); K];
         let mut heap = H::new_with_k(k);
         #[cfg_attr(rustfmt, rustfmt_skip)]
         let leaf_touched_count = self.recurse_knn(
@@ -554,15 +556,17 @@ mod tests {
 
     #[test]
     fn get_build_points_bounds() {
+        const K: usize = 2;
         let cloud = cloud3();
         let indices = vec![0, 1, 2];
-        let bounds = KDTree::get_build_points_bounds(&cloud, &indices);
+        let bounds = KDTree::<_, _, K>::get_build_points_bounds(&cloud, &indices);
         assert_eq!(bounds.0, vec![-1., -4.]);
         assert_eq!(bounds.1, vec![2., 3.]);
     }
 
     #[test]
     fn max_delta_index() {
+        const K: usize = 2;
         let b = |x: f32, y: f32| {
             [
                 NotNan::<f32>::new(x).unwrap(),
@@ -570,28 +574,30 @@ mod tests {
             ]
         };
         assert_eq!(
-            KDTree::<f32, P2>::max_delta_index(&b(0., 0.), &b(0., 1.)),
+            KDTree::<f32, P2, K>::max_delta_index(&b(0., 0.), &b(0., 1.)),
             1
         );
         assert_eq!(
-            KDTree::<f32, P2>::max_delta_index(&b(0., 0.), &b(-1., 1.)),
+            KDTree::<f32, P2, K>::max_delta_index(&b(0., 0.), &b(-1., 1.)),
             1
         );
         assert_eq!(
-            KDTree::<f32, P2>::max_delta_index(&b(0., 0.), &b(-1., -2.)),
+            KDTree::<f32, P2, K>::max_delta_index(&b(0., 0.), &b(-1., -2.)),
             0
         );
     }
 
     #[test]
     fn new_tree() {
+        const K: usize = 2;
         let cloud = cloud3();
-        let tree = KDTree::new_with_bucket_size(&cloud, 2);
+        let tree = KDTree::<_,_,K>::new_with_bucket_size(&cloud, 2);
         dbg!(tree);
     }
 
     #[test]
     fn query_1nn_allow_self() {
+        const K: usize = 2;
         let mut touch_sum = 0;
         const PASS_COUNT: u32 = 20;
         const QUERY_COUNT: u32 = 100;
@@ -604,7 +610,7 @@ mod tests {
         };
         for _ in 0..PASS_COUNT {
             let cloud = random_point_cloud(CLOUD_SIZE);
-            let tree = KDTree::new(&cloud);
+            let tree = KDTree::<_,_,K>::new(&cloud);
             for _ in 0..QUERY_COUNT {
                 let query = random_point();
                 let mut touch_statistics = 0;
@@ -647,6 +653,7 @@ mod tests {
 
     #[test]
     fn query_knn_allow_self() {
+        const K: usize = 2;
         const QUERY_COUNT: u32 = 100;
         const CLOUD_SIZE: u32 = 1000;
         const PARAMETERS: Parameters<f32> = Parameters {
@@ -656,7 +663,7 @@ mod tests {
             sort_results: true,
         };
         let cloud = random_point_cloud(CLOUD_SIZE);
-        let tree = KDTree::new(&cloud);
+        let tree = KDTree::<_,_,K>::new(&cloud);
         for k in [1, 2, 3, 5, 7, 13] {
             for _ in 0..QUERY_COUNT {
                 let query = random_point();
@@ -715,8 +722,9 @@ mod tests {
 
     #[test]
     fn small_clouds_can_lead_to_neighbours() {
+        const K: usize = 2;
         let cloud = vec![P2::new(0.0, 0.0), P2::new(1.0, 0.0)];
-        let tree = KDTree::new(&cloud);
+        let tree = KDTree::<_,_,K>::new(&cloud);
         let query = P2::new(0.5, 0.0);
         for _ in [CandidateContainer::Linear, CandidateContainer::BinaryHeap] {
             let nns = tree.knn(3, &query);
@@ -726,8 +734,9 @@ mod tests {
 
     #[test]
     fn max_radius_can_lead_to_neighbours() {
+        const K: usize = 2;
         let cloud = vec![P2::new(0.0, 0.0), P2::new(1.0, 0.0)];
-        let tree = KDTree::new(&cloud);
+        let tree = KDTree::<_,_,K>::new(&cloud);
         let query = P2::new(0.1, 0.0);
         let parameters = Parameters {
             epsilon: 0.0,
