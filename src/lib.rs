@@ -55,7 +55,7 @@ mod node;
 
 use internal_parameters::InternalParameters;
 use node::Node;
-use num_traits::{clamp_max, clamp_min, Bounded, Zero, Signed};
+use num_traits::{clamp_max, clamp_min, Bounded, Zero, Signed, FromPrimitive};
 use ordered_float::Float;
 pub use ordered_float::NotNan;
 use std::{collections::BinaryHeap, ops::AddAssign};
@@ -65,11 +65,11 @@ use heap::CandidateHeap;
 use internal_neighbour::InternalNeighbour;
 
 /// The scalar type for points in the space to be searched
-pub trait Scalar: Float + AddAssign + std::fmt::Debug {}
-impl<T: Float + AddAssign + std::fmt::Debug> Scalar for T {}
+pub trait Scalar: Float + AddAssign + FromPrimitive + std::fmt::Debug {}
+impl<T: Float + AddAssign + FromPrimitive + std::fmt::Debug> Scalar for T {}
 
 /// A point in the space to be searched
-pub trait Point<T: Scalar>: Default + Clone + Debug {
+pub trait Point<T: Scalar>: Default + Clone + Debug + Copy {
     /// Sets the value for the `i`-th component, `i` must be within `0..DIM`.
     fn set(&mut self, i: u32, value: NotNan<T>);
     /// Gets the value for the `i`-th component, `i` must be within `0..DIM`.
@@ -177,7 +177,7 @@ type Nodes<T, P> = Vec<Node<T, P>>;
 pub struct KDTree<T: Scalar, P: Point<T>, const K: usize> {
     /// size of a bucket
     bucket_size: u32,
-    /// search nodes
+    /// Search nodes
     nodes: Nodes<T, P>,
     /// point data, size cloud.len() * P::DIM
     points: Vec<NotNan<T>>,
@@ -338,7 +338,6 @@ impl<T: Scalar + Signed, P: Point<T>, const K: usize> KDTree<T, P, K> {
                 images_to_check.push(image_to_check);
             }
         }
-        // println!("\nhere's one {query:?}, {images_to_check:?}\n");
 
         // Then check all images
         for image in &images_to_check {

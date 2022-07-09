@@ -42,3 +42,7 @@ required-features = ["dummy_point"]
 name = "simple"
 harness = false
 required-features = ["dummy_point"]
+
+[[bench]]
+name = "periodic"
+harness = false
