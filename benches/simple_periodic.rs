@@ -1,5 +1,5 @@
-use nabo::dummy_point::*;
-use nabo::KDTree;
+use nabo_pbc::dummy_point::*;
+use nabo_pbc::KDTree;
 use ordered_float::NotNan;
 
 fn main() {

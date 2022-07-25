@@ -11,6 +11,9 @@
 [ci-badge]: https://img.shields.io/github/workflow/status/enlightware/nabo-rs/CI
 [ci-url]: https://github.com/enlightware/nabo-rs/actions
 
+This is a fork of nabo, which implements support for periodic boundaries in a very efficient manner. The API has changed minimally. The original README
+from Stéphane Magnenat & Hannes Sommer is attached below:
+
 ## Overview
 
 nabo is a fast K Nearest Neighbour (KNN) library for low-dimensional spaces.

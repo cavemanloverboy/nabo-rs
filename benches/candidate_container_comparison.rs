@@ -1,10 +1,10 @@
 use std::time::Duration;
 
 use criterion::{criterion_group, criterion_main, BenchmarkId, Criterion};
-use nabo::dummy_point::*;
-use nabo::CandidateContainer;
-use nabo::KDTree;
-use nabo::Parameters;
+use nabo_pbc::dummy_point::*;
+use nabo_pbc::CandidateContainer;
+use nabo_pbc::KDTree;
+use nabo_pbc::Parameters;
 
 fn bench_candidate_container_types(c: &mut Criterion) {
     const QUERY_COUNT: u32 = 10000;

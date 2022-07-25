@@ -1,6 +1,6 @@
-use nabo::dummy_point::*;
-use nabo::KDTree;
-use nabo::Point;
+use nabo_pbc::dummy_point::*;
+use nabo_pbc::KDTree;
+use nabo_pbc::Point;
 
 fn main() {
     const QUERY_COUNT: u32 = 20000;

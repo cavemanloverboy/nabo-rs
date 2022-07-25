@@ -1,6 +1,6 @@
-use nabo::dummy_point::*;
-use nabo::KDTree;
-use nabo::Neighbour;
+use nabo_pbc::dummy_point::*;
+use nabo_pbc::KDTree;
+use nabo_pbc::Neighbour;
 use std::time::Instant;
 use rayon::iter::*;
 use ordered_float::NotNan;

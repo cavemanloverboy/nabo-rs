@@ -1,12 +1,10 @@
 [package]
-name = "nabo"
+name = "nabo-pbc"
 version = "0.2.1"
 edition = "2018"
-authors = ["Stéphane Magnenat <stephane.magnenat@enlightware.ch>", "Hannes Sommer <hannes.sommer@enlightware.ch>"]
+authors = ["Cavey Cool <caveycool@gmail.com>"]
 license = "MIT OR Apache-2.0"
-description = "A fast K Nearest Neighbor (KNN) library for low-dimensional spaces"
-repository = "https://github.com/enlightware/nabo-rs"
-homepage = "https://github.com/enlightware/nabo-rs"
+description = "A fast K Nearest Neighbor (KNN) library for low-dimensional spaces, now with support for periodic boundary conditions."
 readme = "README.md"
 keywords = ["NNS", "nearest_neighbor", "K-D_tree", "data_structures", "KNN"]
 categories = ["mathematics", "science", "computer-vision", "multimedia", "game-development"]

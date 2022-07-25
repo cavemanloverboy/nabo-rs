@@ -7,8 +7,8 @@
 //!
 //! # Example
 //! ```
-//! use nabo::dummy_point::*;
-//! use nabo::KDTree;
+//! use nabo_pbc::dummy_point::*;
+//! use nabo_pbc::KDTree;
 //! const K: usize = 2;
 //! let cloud = random_point_cloud(10000);
 //! let tree = KDTree::<_,_,K>::new(&cloud);
@@ -18,10 +18,10 @@
 //!
 //! If you want to have more control on the search, you can use the advanced API:
 //! ```
-//! use nabo::dummy_point::*;
-//! use nabo::KDTree;
-//! use nabo::CandidateContainer;
-//! use nabo::Parameters;
+//! use nabo_pbc::dummy_point::*;
+//! use nabo_pbc::KDTree;
+//! use nabo_pbc::CandidateContainer;
+//! use nabo_pbc::Parameters;
 //! const K: usize = 2;
 //! let cloud = random_point_cloud(10000);
 //! let tree = KDTree::<_,_,K>::new(&cloud);
