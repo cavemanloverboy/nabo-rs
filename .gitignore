@@ -1,2 +1,7 @@
 /target
 Cargo.lock
+test_data
+knns
+.gitignore
+queries
+scipy_test.py
